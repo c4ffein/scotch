@@ -1,3 +1,8 @@
+> **This is a personal mirror of [Scotch](https://gitlab.inria.fr/scotch/scotch), used to track changes and prepare patches for upstream contribution. The official Scotch repository is hosted on [Inria GitLab](https://gitlab.inria.fr/scotch/scotch) (public repo, but special rights are required for contributing).**
+
+
+---
+
 Scotch: a software package for graph and mesh/hypergraph partitioning, graph clustering, and sparse matrix ordering
 ===================================================================================================================
 
