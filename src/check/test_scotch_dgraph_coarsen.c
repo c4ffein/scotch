@@ -215,6 +215,13 @@ char *              argv[])
 
     SCOTCH_dgraphData (&coargrafdat, NULL, &coarvertglbnbr, &coarvertlocnbr, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
+    if ((o == 0) && (coarvertglbnbr > 0)) {         /* If coarse graph was created and is non-empty */
+      if (SCOTCH_dgraphCheck (&coargrafdat) != 0) {
+        SCOTCH_errorPrint ("main: invalid coarse graph");
+        exit (EXIT_FAILURE);
+      }
+    }
+
     for (procnum = 0; procnum < procglbnbr; procnum ++) {
       if (coarvertlocnbr > coarvertlocmax) {
         SCOTCH_errorPrint ("main: invalid local multinode array size");

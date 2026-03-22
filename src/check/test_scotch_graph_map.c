@@ -67,6 +67,43 @@
 
 #define COORD(x,y)                  ((y) * xdimsiz + (x))
 
+/**************************************/
+/*                                    */
+/* The consistency checking routines. */
+/*                                    */
+/**************************************/
+
+/* checkMap: verify that all partition values are in valid range [0, archsiz) or -1 for unmapped.
+** For variable-sized architectures, values can exceed vertnbr as they represent target vertices. */
+static
+void
+checkMap (
+const SCOTCH_Num * const    parttab,
+const SCOTCH_Num            vertnbr,
+const SCOTCH_Num            archsiz,
+const int                   fixedmap)               /* If true, fixed vertices may have larger indices */
+{
+  SCOTCH_Num          vertnum;
+
+  for (vertnum = 0; vertnum < vertnbr; vertnum ++) {
+    SCOTCH_Num          partval;
+
+    partval = parttab[vertnum];
+    if (partval == -1)                              /* Unmapped vertex is valid */
+      continue;
+    if (partval < 0) {                              /* Other negative values are invalid */
+      SCOTCH_errorPrint ("checkMap: vertex " SCOTCH_NUMSTRING " has invalid negative partition " SCOTCH_NUMSTRING,
+                         vertnum, partval);
+      exit (EXIT_FAILURE);
+    }
+    if ((fixedmap == 0) && (partval >= archsiz)) {  /* For non-fixed mappings, check against archsiz */
+      SCOTCH_errorPrint ("checkMap: vertex " SCOTCH_NUMSTRING " has partition " SCOTCH_NUMSTRING " >= archsiz " SCOTCH_NUMSTRING,
+                         vertnum, partval, archsiz);
+      exit (EXIT_FAILURE);
+    }
+  }
+}
+
 /*********************/
 /*                   */
 /* The main routine. */
@@ -229,6 +266,9 @@ char *              argv[])
           SCOTCH_errorPrint ("main: cannot compute mapping");
           exit (EXIT_FAILURE);
         }
+
+        if ((typenum == 0) && (archnum < 2))        /* For plain mapping on fixed-size architectures, verify all partitions are valid */
+          checkMap (parttab, vertnbr, archsiz, 0);
       }
 
       SCOTCH_graphMapSave (&grafdat, &mappdat, fileptr);

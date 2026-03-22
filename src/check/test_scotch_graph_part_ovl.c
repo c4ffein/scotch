@@ -148,6 +148,14 @@ char *              argv[])
     exit (EXIT_FAILURE);
   }
 
+  for (vertnum = 0; vertnum < vertnbr; vertnum ++) { /* Check partition values are in valid range */
+    if ((parttax[vertnum] >= 0) && (parttax[vertnum] >= partnbr)) {
+      SCOTCH_errorPrint ("main: vertex " SCOTCH_NUMSTRING " has invalid partition " SCOTCH_NUMSTRING " >= " SCOTCH_NUMSTRING,
+                         (SCOTCH_Num) vertnum, parttax[vertnum], partnbr);
+      exit (EXIT_FAILURE);
+    }
+  }
+
   edgetax -= baseval;
   parttax -= baseval;
 

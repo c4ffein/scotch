@@ -227,6 +227,11 @@ char *              argv[])
 
   fclose (fileptr);
 
+  if (SCOTCH_graphCheck (&graftab[0]) != 0) {
+    SCOTCH_errorPrint ("main: invalid graph");
+    exit (EXIT_FAILURE);
+  }
+
   printf ("Using a default context\n");
 
   if (SCOTCH_contextInit (&contdat) != 0) {

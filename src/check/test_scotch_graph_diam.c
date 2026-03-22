@@ -74,6 +74,7 @@ char *              argv[])
 {
   FILE *              fileptr;
   SCOTCH_Graph        grafdat;
+  SCOTCH_Num          vertnbr;
   SCOTCH_Num          diamval;
 
   SCOTCH_errorProg (argv[0]);
@@ -100,10 +101,19 @@ char *              argv[])
 
   fclose (fileptr);
 
+  SCOTCH_graphData (&grafdat, NULL, &vertnbr, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
   SCOTCH_randomReset ();
 
   if ((diamval = SCOTCH_graphDiamPV (&grafdat)) < 0) {
     SCOTCH_errorPrint ("main: cannot compute graph pseudo-diameter");
+    exit (EXIT_FAILURE);
+  }
+
+  if ((vertnbr > 0) && (diamval >= vertnbr) &&      /* Pseudo-diameter cannot exceed number of vertices minus one */
+      (diamval != SCOTCH_NUMMAX)) {                 /* SCOTCH_NUMMAX is returned for disconnected graphs          */
+    SCOTCH_errorPrint ("main: invalid pseudo-diameter " SCOTCH_NUMSTRING " for graph with " SCOTCH_NUMSTRING " vertices",
+                       diamval, vertnbr);
     exit (EXIT_FAILURE);
   }
 

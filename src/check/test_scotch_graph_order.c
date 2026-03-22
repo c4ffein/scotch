@@ -62,6 +62,45 @@
 
 #include "scotch.h"
 
+/**************************************/
+/*                                    */
+/* The consistency checking routines. */
+/*                                    */
+/**************************************/
+
+/* checkOrder: verify that permutation and inverse permutation
+** are bijective and are inverses of each other.               */
+static
+void
+checkOrder (
+const SCOTCH_Num * const    permtab,
+const SCOTCH_Num * const    peritab,
+const SCOTCH_Num            baseval,
+const SCOTCH_Num            vertnbr)
+{
+  SCOTCH_Num          vertnum;
+
+  for (vertnum = 0; vertnum < vertnbr; vertnum ++) {
+    if ((permtab[vertnum] < baseval) ||
+        (permtab[vertnum] >= baseval + vertnbr)) {
+      SCOTCH_errorPrint ("checkOrder: invalid permtab value " SCOTCH_NUMSTRING " at index " SCOTCH_NUMSTRING,
+                         permtab[vertnum], vertnum);
+      exit (EXIT_FAILURE);
+    }
+    if ((peritab[vertnum] < baseval) ||
+        (peritab[vertnum] >= baseval + vertnbr)) {
+      SCOTCH_errorPrint ("checkOrder: invalid peritab value " SCOTCH_NUMSTRING " at index " SCOTCH_NUMSTRING,
+                         peritab[vertnum], vertnum);
+      exit (EXIT_FAILURE);
+    }
+    if (peritab[permtab[vertnum] - baseval] != vertnum + baseval) {
+      SCOTCH_errorPrint ("checkOrder: permutation not bijective at vertex " SCOTCH_NUMSTRING,
+                         vertnum + baseval);
+      exit (EXIT_FAILURE);
+    }
+  }
+}
+
 /*********************/
 /*                   */
 /* The main routine. */
@@ -83,6 +122,8 @@ char *              argv[])
   SCOTCH_Num          listnbr;
   SCOTCH_Num          listnum;
   SCOTCH_Num *        listtab;
+  SCOTCH_Num *        permtab;
+  SCOTCH_Num *        peritab;
 
   SCOTCH_errorProg (argv[0]);
 
@@ -119,6 +160,12 @@ char *              argv[])
        listnum < listnbr; listnum ++, vertnum ++)
     listtab[listnum] = vertnum;
 
+  if (((permtab = malloc (vertnbr * sizeof (SCOTCH_Num))) == NULL) ||
+      ((peritab = malloc (vertnbr * sizeof (SCOTCH_Num))) == NULL)) {
+    SCOTCH_errorPrint ("main: out of memory (2)");
+    exit (EXIT_FAILURE);
+  }
+
   if ((fileptr = tmpfile ()) == NULL) {           /* Open temporary file for resulting output */
     SCOTCH_errorPrint ("main: cannot open file (2)");
     exit (EXIT_FAILURE);
@@ -129,7 +176,7 @@ char *              argv[])
     exit (EXIT_FAILURE);
   }
 
-  if (SCOTCH_graphOrderInit (&grafdat, &ordedat, NULL, NULL, NULL, NULL, NULL) != 0) { /* Initialize ordering */
+  if (SCOTCH_graphOrderInit (&grafdat, &ordedat, permtab, peritab, NULL, NULL, NULL) != 0) { /* Initialize ordering with permutation arrays */
     SCOTCH_errorPrint ("main: cannot initialize ordering (1)");
     exit (EXIT_FAILURE);
   }
@@ -143,6 +190,8 @@ char *              argv[])
     SCOTCH_errorPrint ("main: invalid ordering (1)");
     exit (EXIT_FAILURE);
   }
+
+  checkOrder (permtab, peritab, baseval, vertnbr); /* Verify permutation bijectivity */
 
   SCOTCH_graphOrderSave     (&grafdat, &ordedat, fileptr); /* Test ordering data output routines */
   SCOTCH_graphOrderSaveMap  (&grafdat, &ordedat, fileptr);
@@ -171,6 +220,8 @@ char *              argv[])
 
   fclose (fileptr);
 
+  free (peritab);
+  free (permtab);
   free (listtab);
   SCOTCH_stratExit      (&stradat);
   SCOTCH_graphOrderExit (&grafdat, &ordedat);

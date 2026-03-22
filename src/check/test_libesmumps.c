@@ -60,6 +60,57 @@
 #include "scotch.h"
 #include "esmumps.h"
 
+/**************************************/
+/*                                    */
+/* The consistency checking routines. */
+/*                                    */
+/**************************************/
+
+/* checkEsmumps: verify nv and pe arrays after esmumps ordering.
+** After ordering, nv[i] >= 0 for all i (0 for secondary variables,
+** > 0 for principal variables), and pe[i] <= 0 for all i
+** (0 for tree roots, negative for parent/principal pointers).
+*/
+
+static
+void
+checkEsmumps (
+const SCOTCH_Num * const    nvtab,
+const SCOTCH_Num * const    petab,
+const SCOTCH_Num            vertnbr,
+const char * const          funcstr)
+{
+  SCOTCH_Num          vertnum;
+
+  for (vertnum = 0; vertnum < vertnbr; vertnum ++) {
+    if (nvtab[vertnum] < 0) {
+      SCOTCH_errorPrint ("checkEsmumps (%s): nvtab[" SCOTCH_NUMSTRING "] = " SCOTCH_NUMSTRING " is negative",
+                         funcstr, vertnum, nvtab[vertnum]);
+      exit (EXIT_FAILURE);
+    }
+    if (petab[vertnum] > 0) {
+      SCOTCH_errorPrint ("checkEsmumps (%s): petab[" SCOTCH_NUMSTRING "] = " SCOTCH_NUMSTRING " is positive",
+                         funcstr, vertnum, petab[vertnum]);
+      exit (EXIT_FAILURE);
+    }
+    if (petab[vertnum] < 0) {                      /* Check parent pointer is valid */
+      SCOTCH_Num          parval;
+
+      parval = - petab[vertnum];                    /* Get 1-based parent index */
+      if ((parval < 1) || (parval > vertnbr)) {
+        SCOTCH_errorPrint ("checkEsmumps (%s): petab[" SCOTCH_NUMSTRING "] = " SCOTCH_NUMSTRING " points to invalid vertex",
+                           funcstr, vertnum, petab[vertnum]);
+        exit (EXIT_FAILURE);
+      }
+      if (nvtab[parval - 1] <= 0) {                /* Parent must be a principal variable */
+        SCOTCH_errorPrint ("checkEsmumps (%s): petab[" SCOTCH_NUMSTRING "] points to non-principal variable " SCOTCH_NUMSTRING,
+                           funcstr, vertnum, parval);
+        exit (EXIT_FAILURE);
+      }
+    }
+  }
+}
+
 /*********************/
 /*                   */
 /* The main routine. */
@@ -128,6 +179,7 @@ char *              argv[])
     SCOTCH_errorPrint ("main: cannot run esmumps");
     exit (EXIT_FAILURE);
   }
+  checkEsmumps (nvtab, petab, vertnbr, "esmumps");
 
 #ifdef ESMUMPS_HAS_ESMUMPSV
   if (velotab != NULL) {
@@ -141,6 +193,7 @@ char *              argv[])
       SCOTCH_errorPrint ("main: cannot run esmumpsv");
       exit (EXIT_FAILURE);
     }
+    checkEsmumps (nvtab, petab, vertnbr, "esmumpsv");
   }
 #endif /* ESMUMPS_HAS_ESMUMPSV */
 

@@ -110,6 +110,11 @@ char *              argv[])
     exit (EXIT_FAILURE);
   }
 
+  if (SCOTCH_graphCheck (&grafdat) != 0) {
+    SCOTCH_errorPrint ("main: invalid graph converted from mesh");
+    exit (EXIT_FAILURE);
+  }
+
   SCOTCH_graphExit (&grafdat);
   SCOTCH_meshExit (&meshdat);
 
