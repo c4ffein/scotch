@@ -82,6 +82,7 @@ char *              argv[])
   SCOTCH_Graph        grafdat;
   SCOTCH_Strat        stradat;
   SCOTCH_Arch         archtab[ARCHNBR];
+  SCOTCH_Num          archsiztab[ARCHNBR];          /* Architecture sizes recorded before save */
   int                 archnbr = 0;
   int                 i;
   SCOTCH_Num          listnbr = 5;
@@ -156,6 +157,12 @@ char *              argv[])
     }
 
     for (j = 0; j < (1 + i); j ++) {
+      archsiztab[archnbr + j] = SCOTCH_archSize (&archtab[archnbr + j]); /* Record size before save */
+      if (archsiztab[archnbr + j] <= 0) {
+        SCOTCH_errorPrint ("main: invalid architecture size " SCOTCH_NUMSTRING " (%d)",
+                           archsiztab[archnbr + j], archnbr + 1 + j);
+        exit (EXIT_FAILURE);
+      }
       if (SCOTCH_archSave (&archtab[archnbr + j], fileptr) != 0) {
         SCOTCH_errorPrint ("main: cannot save architecture (%d)", archnbr + 1 + j);
         exit (EXIT_FAILURE);
@@ -188,6 +195,17 @@ char *              argv[])
   }
 
   fclose (fileptr);
+
+  for (i = 0; i < archnbr; i ++) {                /* Verify architecture sizes match after reload */
+    SCOTCH_Num          archsiz;
+
+    archsiz = SCOTCH_archSize (&archtab[i]);
+    if (archsiz != archsiztab[i]) {
+      SCOTCH_errorPrint ("main: architecture size mismatch after reload (%d): " SCOTCH_NUMSTRING " != " SCOTCH_NUMSTRING,
+                         1 + i, archsiz, archsiztab[i]);
+      exit (EXIT_FAILURE);
+    }
+  }
 
   for (i = 0; i < archnbr; i ++)                  /* Destroy architectures in any order, as they are now all autonomous from each other */
     SCOTCH_archExit (&archtab[i]);

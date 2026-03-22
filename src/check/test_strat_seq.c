@@ -83,67 +83,100 @@ char *              argv[])
   printf ("Sequential mapping strategy, SCOTCH_STRATDEFAULT\n");
 
   SCOTCH_stratInit (&stradat);
-  SCOTCH_stratGraphMapBuild (&stradat, SCOTCH_STRATDEFAULT, 16, 0.03);
+  if (SCOTCH_stratGraphMapBuild (&stradat, SCOTCH_STRATDEFAULT, 16, 0.03) != 0) {
+    SCOTCH_errorPrint ("main: cannot build mapping strategy (1)");
+    exit (EXIT_FAILURE);
+  }
   SCOTCH_stratExit (&stradat);
 
   printf ("Sequential mapping strategy, SCOTCH_STRATRECURSIVE\n");
 
   SCOTCH_stratInit (&stradat);
-  SCOTCH_stratGraphMapBuild (&stradat, SCOTCH_STRATRECURSIVE, 16, 0.03);
+  if (SCOTCH_stratGraphMapBuild (&stradat, SCOTCH_STRATRECURSIVE, 16, 0.03) != 0) {
+    SCOTCH_errorPrint ("main: cannot build mapping strategy (2)");
+    exit (EXIT_FAILURE);
+  }
   SCOTCH_stratExit (&stradat);
 
   printf ("Sequential mapping strategy, SCOTCH_STRATREMAP\n");
 
   SCOTCH_stratInit (&stradat);
-  SCOTCH_stratGraphMapBuild (&stradat, SCOTCH_STRATREMAP, 16, 0.03);
+  if (SCOTCH_stratGraphMapBuild (&stradat, SCOTCH_STRATREMAP, 16, 0.03) != 0) {
+    SCOTCH_errorPrint ("main: cannot build mapping strategy (3)");
+    exit (EXIT_FAILURE);
+  }
   SCOTCH_stratExit (&stradat);
 
   printf ("Sequential mapping strategy, SCOTCH_STRATRECURSIVE | SCOTCH_STRATREMAP\n");
 
   SCOTCH_stratInit (&stradat);
-  SCOTCH_stratGraphMapBuild (&stradat, SCOTCH_STRATRECURSIVE | SCOTCH_STRATREMAP, 16, 0.03);
+  if (SCOTCH_stratGraphMapBuild (&stradat, SCOTCH_STRATRECURSIVE | SCOTCH_STRATREMAP, 16, 0.03) != 0) {
+    SCOTCH_errorPrint ("main: cannot build mapping strategy (4)");
+    exit (EXIT_FAILURE);
+  }
   SCOTCH_stratExit (&stradat);
 
   printf ("Sequential ordering strategy, SCOTCH_STRATDEFAULT\n");
 
   SCOTCH_stratInit (&stradat);
-  SCOTCH_stratGraphOrderBuild (&stradat, SCOTCH_STRATDEFAULT, 0, 0.2);
+  if (SCOTCH_stratGraphOrderBuild (&stradat, SCOTCH_STRATDEFAULT, 0, 0.2) != 0) {
+    SCOTCH_errorPrint ("main: cannot build ordering strategy (1)");
+    exit (EXIT_FAILURE);
+  }
   SCOTCH_stratExit (&stradat);
 
   printf ("Sequential ordering strategy, SCOTCH_STRATDISCONNECTED\n");
 
   SCOTCH_stratInit (&stradat);
-  SCOTCH_stratGraphOrderBuild (&stradat, SCOTCH_STRATDISCONNECTED, 3, 0.2);
+  if (SCOTCH_stratGraphOrderBuild (&stradat, SCOTCH_STRATDISCONNECTED, 3, 0.2) != 0) {
+    SCOTCH_errorPrint ("main: cannot build ordering strategy (2)");
+    exit (EXIT_FAILURE);
+  }
   SCOTCH_stratExit (&stradat);
 
   printf ("Sequential ordering strategy, SCOTCH_STRATLEVELMAX\n");
 
   SCOTCH_stratInit (&stradat);
-  SCOTCH_stratGraphOrderBuild (&stradat, SCOTCH_STRATLEVELMAX, 3, 0.2);
+  if (SCOTCH_stratGraphOrderBuild (&stradat, SCOTCH_STRATLEVELMAX, 3, 0.2) != 0) {
+    SCOTCH_errorPrint ("main: cannot build ordering strategy (3)");
+    exit (EXIT_FAILURE);
+  }
   SCOTCH_stratExit (&stradat);
 
   printf ("Sequential ordering strategy, SCOTCH_STRATLEVELMIN\n");
 
   SCOTCH_stratInit (&stradat);
-  SCOTCH_stratGraphOrderBuild (&stradat, SCOTCH_STRATLEVELMIN, 3, 0.2);
+  if (SCOTCH_stratGraphOrderBuild (&stradat, SCOTCH_STRATLEVELMIN, 3, 0.2) != 0) {
+    SCOTCH_errorPrint ("main: cannot build ordering strategy (4)");
+    exit (EXIT_FAILURE);
+  }
   SCOTCH_stratExit (&stradat);
 
   printf ("Sequential ordering strategy, SCOTCH_STRATLEVELMAX | SCOTCH_STRATLEVELMIN\n");
 
   SCOTCH_stratInit (&stradat);
-  SCOTCH_stratGraphOrderBuild (&stradat, SCOTCH_STRATLEVELMAX | SCOTCH_STRATLEVELMIN, 3, 0.2);
+  if (SCOTCH_stratGraphOrderBuild (&stradat, SCOTCH_STRATLEVELMAX | SCOTCH_STRATLEVELMIN, 3, 0.2) != 0) {
+    SCOTCH_errorPrint ("main: cannot build ordering strategy (5)");
+    exit (EXIT_FAILURE);
+  }
   SCOTCH_stratExit (&stradat);
 
   printf ("Sequential ordering strategy, SCOTCH_STRATLEAFSIMPLE\n");
 
   SCOTCH_stratInit (&stradat);
-  SCOTCH_stratGraphOrderBuild (&stradat, SCOTCH_STRATLEAFSIMPLE, 3, 0.2);
+  if (SCOTCH_stratGraphOrderBuild (&stradat, SCOTCH_STRATLEAFSIMPLE, 3, 0.2) != 0) {
+    SCOTCH_errorPrint ("main: cannot build ordering strategy (6)");
+    exit (EXIT_FAILURE);
+  }
   SCOTCH_stratExit (&stradat);
 
   printf ("Sequential ordering strategy, SCOTCH_STRATSEPASIMPLE\n");
 
   SCOTCH_stratInit (&stradat);
-  SCOTCH_stratGraphOrderBuild (&stradat, SCOTCH_STRATSEPASIMPLE, 3, 0.2);
+  if (SCOTCH_stratGraphOrderBuild (&stradat, SCOTCH_STRATSEPASIMPLE, 3, 0.2) != 0) {
+    SCOTCH_errorPrint ("main: cannot build ordering strategy (7)");
+    exit (EXIT_FAILURE);
+  }
   SCOTCH_stratExit (&stradat);
 
   exit (EXIT_SUCCESS);

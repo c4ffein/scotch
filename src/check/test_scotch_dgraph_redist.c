@@ -169,6 +169,11 @@ char *              argv[])
     exit (EXIT_FAILURE);
   }
 
+  if (SCOTCH_dgraphCheck (&dstgrafdat) != 0) {
+    SCOTCH_errorPrint ("main: invalid redistributed graph");
+    exit (EXIT_FAILURE);
+  }
+
   SCOTCH_dgraphExit (&dstgrafdat);
   SCOTCH_dgraphExit (&srcgrafdat);
   free (partloctab);

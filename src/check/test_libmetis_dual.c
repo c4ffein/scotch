@@ -159,6 +159,21 @@ char *              argv[])
     exit (EXIT_FAILURE);
   }
 
+  for (vertnum = 0; vertnum < ne; vertnum ++) {   /* Verify element partition range */
+    if ((epart[vertnum] < 0) || (epart[vertnum] >= nparts)) {
+      SCOTCH_errorPrint ("main: element " SCOTCH_NUMSTRING " has invalid partition " SCOTCH_NUMSTRING,
+                         vertnum, epart[vertnum]);
+      exit (EXIT_FAILURE);
+    }
+  }
+  for (vertnum = 0; vertnum < nn; vertnum ++) {   /* Verify node partition range */
+    if ((npart[vertnum] < 0) || (npart[vertnum] >= nparts)) {
+      SCOTCH_errorPrint ("main: node " SCOTCH_NUMSTRING " has invalid partition " SCOTCH_NUMSTRING,
+                         vertnum, npart[vertnum]);
+      exit (EXIT_FAILURE);
+    }
+  }
+
   free (npart);
   free (epart);
 

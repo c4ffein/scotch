@@ -84,49 +84,73 @@ char *              argv[])
   printf ("Parallel mapping strategy, SCOTCH_STRATDEFAULT\n");
 
   SCOTCH_stratInit (&stradat);
-  SCOTCH_stratDgraphMapBuild (&stradat, SCOTCH_STRATDEFAULT, 16, 16, 0.03);
+  if (SCOTCH_stratDgraphMapBuild (&stradat, SCOTCH_STRATDEFAULT, 16, 16, 0.03) != 0) {
+    SCOTCH_errorPrint ("main: cannot build parallel mapping strategy (1)");
+    exit (EXIT_FAILURE);
+  }
   SCOTCH_stratExit (&stradat);
 
   printf ("Parallel mapping strategy, SCOTCH_STRATRECURSIVE\n");
 
   SCOTCH_stratInit (&stradat);
-  SCOTCH_stratDgraphMapBuild (&stradat, SCOTCH_STRATRECURSIVE, 16, 16, 0.03);
+  if (SCOTCH_stratDgraphMapBuild (&stradat, SCOTCH_STRATRECURSIVE, 16, 16, 0.03) != 0) {
+    SCOTCH_errorPrint ("main: cannot build parallel mapping strategy (2)");
+    exit (EXIT_FAILURE);
+  }
   SCOTCH_stratExit (&stradat);
 
   printf ("Parallel ordering strategy, SCOTCH_STRATDEFAULT\n");
 
   SCOTCH_stratInit (&stradat);
-  SCOTCH_stratDgraphOrderBuild (&stradat, SCOTCH_STRATDEFAULT, 1, 0, 0.2);
+  if (SCOTCH_stratDgraphOrderBuild (&stradat, SCOTCH_STRATDEFAULT, 1, 0, 0.2) != 0) {
+    SCOTCH_errorPrint ("main: cannot build parallel ordering strategy (1)");
+    exit (EXIT_FAILURE);
+  }
   SCOTCH_stratExit (&stradat);
 
   printf ("Parallel ordering strategy, SCOTCH_STRATLEVELMAX\n");
 
   SCOTCH_stratInit (&stradat);
-  SCOTCH_stratDgraphOrderBuild (&stradat, SCOTCH_STRATLEVELMAX, 1, 3, 0.2);
+  if (SCOTCH_stratDgraphOrderBuild (&stradat, SCOTCH_STRATLEVELMAX, 1, 3, 0.2) != 0) {
+    SCOTCH_errorPrint ("main: cannot build parallel ordering strategy (2)");
+    exit (EXIT_FAILURE);
+  }
   SCOTCH_stratExit (&stradat);
 
   printf ("Parallel ordering strategy, SCOTCH_STRATLEVELMIN\n");
 
   SCOTCH_stratInit (&stradat);
-  SCOTCH_stratDgraphOrderBuild (&stradat, SCOTCH_STRATLEVELMIN, 1, 3, 0.2);
+  if (SCOTCH_stratDgraphOrderBuild (&stradat, SCOTCH_STRATLEVELMIN, 1, 3, 0.2) != 0) {
+    SCOTCH_errorPrint ("main: cannot build parallel ordering strategy (3)");
+    exit (EXIT_FAILURE);
+  }
   SCOTCH_stratExit (&stradat);
 
   printf ("Parallel ordering strategy, SCOTCH_STRATLEVELMAX | SCOTCH_STRATLEVELMIN\n");
 
   SCOTCH_stratInit (&stradat);
-  SCOTCH_stratDgraphOrderBuild (&stradat, SCOTCH_STRATLEVELMAX | SCOTCH_STRATLEVELMIN, 1, 3, 0.2);
+  if (SCOTCH_stratDgraphOrderBuild (&stradat, SCOTCH_STRATLEVELMAX | SCOTCH_STRATLEVELMIN, 1, 3, 0.2) != 0) {
+    SCOTCH_errorPrint ("main: cannot build parallel ordering strategy (4)");
+    exit (EXIT_FAILURE);
+  }
   SCOTCH_stratExit (&stradat);
 
   printf ("Parallel ordering strategy, SCOTCH_STRATLEAFSIMPLE\n");
 
   SCOTCH_stratInit (&stradat);
-  SCOTCH_stratDgraphOrderBuild (&stradat, SCOTCH_STRATLEAFSIMPLE, 1, 0, 0.2);
+  if (SCOTCH_stratDgraphOrderBuild (&stradat, SCOTCH_STRATLEAFSIMPLE, 1, 0, 0.2) != 0) {
+    SCOTCH_errorPrint ("main: cannot build parallel ordering strategy (5)");
+    exit (EXIT_FAILURE);
+  }
   SCOTCH_stratExit (&stradat);
 
   printf ("Parallel ordering strategy, SCOTCH_STRATSEPASIMPLE\n");
 
   SCOTCH_stratInit (&stradat);
-  SCOTCH_stratDgraphOrderBuild (&stradat, SCOTCH_STRATSEPASIMPLE, 1, 0, 0.2);
+  if (SCOTCH_stratDgraphOrderBuild (&stradat, SCOTCH_STRATSEPASIMPLE, 1, 0, 0.2) != 0) {
+    SCOTCH_errorPrint ("main: cannot build parallel ordering strategy (6)");
+    exit (EXIT_FAILURE);
+  }
   SCOTCH_stratExit (&stradat);
 
   exit (EXIT_SUCCESS);

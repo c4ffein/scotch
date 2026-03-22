@@ -150,6 +150,16 @@ char *              argv[])
     SCOTCH_errorPrint ("main: invalid induced graph (1)");
     exit (EXIT_FAILURE);
   }
+  {
+    SCOTCH_Num          indvertnb2;
+
+    SCOTCH_graphSize (&indgrafdat, &indvertnb2, NULL);
+    if (indvertnb2 != indvertnbr) {
+      SCOTCH_errorPrint ("main: induced graph (1) has " SCOTCH_NUMSTRING " vertices instead of " SCOTCH_NUMSTRING,
+                         indvertnb2, indvertnbr);
+      exit (EXIT_FAILURE);
+    }
+  }
   SCOTCH_graphExit (&indgrafdat);
 
   if (SCOTCH_graphInit (&indgrafdat) != 0) {
@@ -163,6 +173,16 @@ char *              argv[])
   if (SCOTCH_graphCheck (&indgrafdat) != 0) {
     SCOTCH_errorPrint ("main: invalid induced graph (2)");
     exit (EXIT_FAILURE);
+  }
+  {
+    SCOTCH_Num          indvertnb2;
+
+    SCOTCH_graphSize (&indgrafdat, &indvertnb2, NULL);
+    if (indvertnb2 != indvertnbr) {
+      SCOTCH_errorPrint ("main: induced graph (2) has " SCOTCH_NUMSTRING " vertices instead of " SCOTCH_NUMSTRING,
+                         indvertnb2, indvertnbr);
+      exit (EXIT_FAILURE);
+    }
   }
   SCOTCH_graphExit (&indgrafdat);
 

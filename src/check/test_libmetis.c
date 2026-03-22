@@ -66,6 +66,65 @@
 #include "scotch.h"
 #include "metis.h"                                /* Our "metis.h" file */
 
+/**************************************/
+/*                                    */
+/* The consistency checking routines. */
+/*                                    */
+/**************************************/
+
+/* checkPart: verify that all partition values are in valid range [0, partnbr) */
+static
+void
+checkPart (
+const SCOTCH_Num * const    parttab,
+const SCOTCH_Num            vertnbr,
+const SCOTCH_Num            partnbr,
+const char * const          funcstr)
+{
+  SCOTCH_Num          vertnum;
+
+  for (vertnum = 0; vertnum < vertnbr; vertnum ++) {
+    if ((parttab[vertnum] < 0) || (parttab[vertnum] >= partnbr)) {
+      SCOTCH_errorPrint ("checkPart (%s): vertex " SCOTCH_NUMSTRING " has invalid partition " SCOTCH_NUMSTRING,
+                         funcstr, vertnum, parttab[vertnum]);
+      exit (EXIT_FAILURE);
+    }
+  }
+}
+
+/* checkPerm: verify permutation and inverse are valid and mutually inverse */
+static
+void
+checkPerm (
+const SCOTCH_Num * const    permtab,
+const SCOTCH_Num * const    peritab,
+const SCOTCH_Num            baseval,
+const SCOTCH_Num            vertnbr,
+const char * const          funcstr)
+{
+  SCOTCH_Num          vertnum;
+
+  for (vertnum = 0; vertnum < vertnbr; vertnum ++) {
+    if ((permtab[vertnum] < baseval) ||
+        (permtab[vertnum] >= baseval + vertnbr)) {
+      SCOTCH_errorPrint ("checkPerm (%s): permtab[" SCOTCH_NUMSTRING "] = " SCOTCH_NUMSTRING " out of range",
+                         funcstr, vertnum, permtab[vertnum]);
+      exit (EXIT_FAILURE);
+    }
+    if ((peritab[vertnum] < baseval) ||
+        (peritab[vertnum] >= baseval + vertnbr)) {
+      SCOTCH_errorPrint ("checkPerm (%s): peritab[" SCOTCH_NUMSTRING "] = " SCOTCH_NUMSTRING " out of range",
+                         funcstr, vertnum, peritab[vertnum]);
+      exit (EXIT_FAILURE);
+    }
+    if (peritab[permtab[vertnum] - baseval] != vertnum + baseval) {
+      SCOTCH_errorPrint ("checkPerm (%s): permutation not bijective at vertex " SCOTCH_NUMSTRING,
+                         funcstr, vertnum + baseval);
+      exit (EXIT_FAILURE);
+    }
+  }
+}
+
 /*********************/
 /*                   */
 /* The main routine. */
@@ -142,12 +201,14 @@ char *              argv[])
     SCOTCH_errorPrint ("main: error in METIS_V3_PartGraphKway");
     exit (EXIT_FAILURE);
   }
+  checkPart (parttab, vertnbr, partnbr, "METIS_V3_PartGraphKway");
 
   if (SCOTCHMETISNAMEC (METIS_PartGraphRecursive) (&vertnbr, verttab, edgetab, velotab, edlotab,
                                                    &fwgtval, &baseval, &partnbr, &foptval, &edgecut, parttab) != METIS_OK) {
     SCOTCH_errorPrint ("main: error in METIS_V3_PartGraphRecursive");
     exit (EXIT_FAILURE);
   }
+  checkPart (parttab, vertnbr, partnbr, "METIS_V3_PartGraphRecursive");
 
   fwgtval &= ~2;                                  /* Take vertex load array as communication volume array */
   if (SCOTCHMETISNAMEC (METIS_PartGraphVKway) (&vertnbr, verttab, edgetab, NULL, velotab,
@@ -155,21 +216,25 @@ char *              argv[])
     SCOTCH_errorPrint ("main: error in METIS_V3_PartGraphKway");
     exit (EXIT_FAILURE);
   }
+  checkPart (parttab, vertnbr, partnbr, "METIS_V3_PartGraphVKway");
 
   if (SCOTCHMETISNAMEC (METIS_EdgeND) (&vertnbr, verttab, edgetab, &baseval, &foptval, peritab, parttab) != METIS_OK) {
     SCOTCH_errorPrint ("main: error in METIS_V3_EdgeND");
     exit (EXIT_FAILURE);
   }
+  checkPerm (peritab, parttab, baseval, vertnbr, "METIS_V3_EdgeND");
 
   if (SCOTCHMETISNAMEC (METIS_NodeND) (&vertnbr, verttab, edgetab, &baseval, &foptval, peritab, parttab) != METIS_OK) {
     SCOTCH_errorPrint ("main: error in METIS_V3_NodeND");
     exit (EXIT_FAILURE);
   }
+  checkPerm (peritab, parttab, baseval, vertnbr, "METIS_V3_NodeND");
 
   if (SCOTCHMETISNAMEC (METIS_NodeWND) (&vertnbr, verttab, edgetab, velotab, &baseval, &foptval, peritab, parttab) != METIS_OK) {
     SCOTCH_errorPrint ("main: error in METIS_V3_NodeWND");
     exit (EXIT_FAILURE);
   }
+  checkPerm (peritab, parttab, baseval, vertnbr, "METIS_V3_NodeWND");
 #endif /* (SCOTCH_METIS_VERSION == 3) */
 
 #if (SCOTCH_METIS_VERSION == 5)
@@ -181,17 +246,20 @@ char *              argv[])
     SCOTCH_errorPrint ("main: error in METIS_V5_PartGraphKway");
     exit (EXIT_FAILURE);
   }
+  checkPart (parttab, vertnbr, partnbr, "METIS_V5_PartGraphKway");
 
   if (SCOTCHMETISNAMEC (METIS_PartGraphRecursive) (&vertnbr, &nconval, verttab, edgetab, velotab, NULL, edlotab,
                                                    &partnbr, awgttab, kbaltab, options, &edgecut, parttab) != METIS_OK) {
     SCOTCH_errorPrint ("main: error in METIS_V5_PartGraphRecursive");
     exit (EXIT_FAILURE);
   }
+  checkPart (parttab, vertnbr, partnbr, "METIS_V5_PartGraphRecursive");
 
   if (SCOTCHMETISNAMEC (METIS_NodeND) (&vertnbr, verttab, edgetab, velotab, options, peritab, parttab) != METIS_OK) {
     SCOTCH_errorPrint ("main: error in METIS_V5_NodeND");
     exit (EXIT_FAILURE);
   }
+  checkPerm (peritab, parttab, baseval, vertnbr, "METIS_V5_NodeND");
 #endif /* (SCOTCH_METIS_VERSION == 5) */
 
   free (peritab);

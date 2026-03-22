@@ -142,6 +142,21 @@ char *              argv[])
     exit (EXIT_FAILURE);
   }
 
+  {
+    SCOTCH_Num          vertglbnbr;
+    SCOTCH_Num          edgeglbnbr;
+
+    SCOTCH_dgraphSize (&grafdat, &vertglbnbr, NULL, &edgeglbnbr, NULL);
+    if (vertglbnbr <= 0) {
+      SCOTCH_errorPrint ("main: invalid global vertex count");
+      exit (EXIT_FAILURE);
+    }
+    if (edgeglbnbr < 0) {
+      SCOTCH_errorPrint ("main: invalid global edge count");
+      exit (EXIT_FAILURE);
+    }
+  }
+
   if (MPI_Barrier (proccomm) != MPI_SUCCESS) {    /* Synchronize for debug */
     SCOTCH_errorPrint ("main: cannot communicate (2)");
     exit (EXIT_FAILURE);

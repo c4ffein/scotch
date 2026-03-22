@@ -78,6 +78,9 @@ char *              argv[])
 {
   FILE *              fileptr;
   SCOTCH_Graph        grafdat;
+  SCOTCH_Graph        gratdat;                      /* Reloaded graph for roundtrip check */
+  SCOTCH_Num          vertnbr;
+  SCOTCH_Num          vertnb2;
 
   SCOTCH_errorProg (argv[0]);
 
@@ -96,6 +99,13 @@ char *              argv[])
     exit (EXIT_FAILURE);
   }
 
+  if (SCOTCH_graphCheck (&grafdat) != 0) {         /* Verify built graph is valid */
+    SCOTCH_errorPrint ("main: invalid built graph");
+    exit (EXIT_FAILURE);
+  }
+
+  SCOTCH_graphSize (&grafdat, &vertnbr, NULL);
+
   if ((fileptr = fopen (argv[1], "w")) == NULL) {
     SCOTCH_errorPrint ("main: cannot open file");
     exit (EXIT_FAILURE);
@@ -109,6 +119,37 @@ char *              argv[])
   fclose (fileptr);
 
   SCOTCH_graphExit (&grafdat);
+
+  if (SCOTCH_graphInit (&gratdat) != 0) {          /* Roundtrip: reload saved graph and validate */
+    SCOTCH_errorPrint ("main: cannot initialize reload graph");
+    exit (EXIT_FAILURE);
+  }
+
+  if ((fileptr = fopen (argv[1], "r")) == NULL) {
+    SCOTCH_errorPrint ("main: cannot open file (2)");
+    exit (EXIT_FAILURE);
+  }
+
+  if (SCOTCH_graphLoad (&gratdat, fileptr, -1, 0) != 0) {
+    SCOTCH_errorPrint ("main: cannot reload graph");
+    exit (EXIT_FAILURE);
+  }
+
+  fclose (fileptr);
+
+  if (SCOTCH_graphCheck (&gratdat) != 0) {
+    SCOTCH_errorPrint ("main: invalid reloaded graph");
+    exit (EXIT_FAILURE);
+  }
+
+  SCOTCH_graphSize (&gratdat, &vertnb2, NULL);
+  if (vertnb2 != vertnbr) {
+    SCOTCH_errorPrint ("main: reloaded graph vertex count mismatch: " SCOTCH_NUMSTRING " != " SCOTCH_NUMSTRING,
+                       vertnb2, vertnbr);
+    exit (EXIT_FAILURE);
+  }
+
+  SCOTCH_graphExit (&gratdat);
 
   exit (EXIT_SUCCESS);
 }

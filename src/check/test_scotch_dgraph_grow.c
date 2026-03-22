@@ -184,6 +184,18 @@ char *              argv[])
     exit (EXIT_FAILURE);
   }
 
+  {                                                 /* Validate partition values are in valid range */
+    SCOTCH_Num          vertlocnum;
+
+    for (vertlocnum = 0; vertlocnum < vertlocnbr; vertlocnum ++) {
+      if ((partgsttab[vertlocnum] < -1) || (partgsttab[vertlocnum] >= 3)) {
+        SCOTCH_errorPrint ("main: vertex " SCOTCH_NUMSTRING " has invalid partition " SCOTCH_NUMSTRING,
+                           vertlocnum + baseval, partgsttab[vertlocnum]);
+        exit (EXIT_FAILURE);
+      }
+    }
+  }
+
   free (seedloctab);
 
   for (procnum = 0; procnum < procglbnbr; procnum ++) {

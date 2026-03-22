@@ -172,6 +172,11 @@ char *              argv[])
 
   free (fronloctab);
 
+  if (SCOTCH_dgraphCheck (&bandgrafdat) != 0) {
+    SCOTCH_errorPrint ("main: invalid band graph");
+    exit (EXIT_FAILURE);
+  }
+
   SCOTCH_dgraphData (&bandgrafdat, &baseval, &bandvertglbnbr, &bandvertlocnbr, NULL, NULL, NULL, NULL, NULL, &bandvlblloctab, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
   for (procnum = 0; procnum < procglbnbr; procnum ++) {

@@ -64,6 +64,7 @@
 #include "scotch.h"
 
 #define STRANBR                     3
+#define ARCHNBR                     5               /* Number of vertices in target architecture */
 
 /*********************/
 /*                   */
@@ -133,7 +134,7 @@ char *              argv[])
     SCOTCH_errorPrint ("main: cannot initialize architecture");
     exit (EXIT_FAILURE);
   }
-  SCOTCH_archCmplt (&archdat, 5);
+  SCOTCH_archCmplt (&archdat, ARCHNBR);
 
   for (stranum = 0; stranum < (STRANBR - 1); stranum ++) {
     for (typenum = 0; typenum < 2; typenum ++) {
@@ -164,6 +165,18 @@ char *              argv[])
       if (o != 0) {
         SCOTCH_errorPrint ("main: cannot compute mapping");
         exit (EXIT_FAILURE);
+      }
+
+      {                                             /* Validate partition range */
+        SCOTCH_Num          vertnum;
+
+        for (vertnum = 0; vertnum < vertnbr; vertnum ++) {
+          if ((parttab[vertnum] < 0) || (parttab[vertnum] >= ARCHNBR)) {
+            SCOTCH_errorPrint ("main: vertex " SCOTCH_NUMSTRING " has invalid partition " SCOTCH_NUMSTRING,
+                               vertnum, parttab[vertnum]);
+            exit (EXIT_FAILURE);
+          }
+        }
       }
     }
 

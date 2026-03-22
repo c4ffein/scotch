@@ -233,6 +233,26 @@ char *              argv[])
     }
   }
 
+  {                                                 /* Drain remaining elements and verify sorted order */
+    INT                 prevval = -1;
+
+    while (nodenbr > 0) {
+      nodeptr = (TestFibo *) fiboHeapMin (&fibodat);
+      if (nodeptr == NULL) {
+        errorPrint ("main: heap is not empty but no minimum found");
+        exit       (EXIT_FAILURE);
+      }
+      if (nodeptr->randval < prevval) {
+        errorPrint ("main: drain: elements not in sorted order");
+        exit       (EXIT_FAILURE);
+      }
+      prevval = nodeptr->randval;
+      fiboHeapDel (&fibodat, (FiboNode *) nodeptr);
+      nodeptr->randval = -1;
+      nodenbr --;
+    }
+  }
+
   fiboHeapExit (&fibodat);
   free         (nodetab);
 
