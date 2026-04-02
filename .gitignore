@@ -1,6 +1,7 @@
 bin
 include
 lib
+.hegel
 tags
 src/tags
 doc/src/*/*.aux
@@ -24,6 +25,11 @@ src/check/test_scotch_graph_dump2.c
 !src/check/CMakeLists.txt
 !src/check/Makefile
 !src/check/data
+!src/check/hegel
+src/check/hegel/core.*
+src/check/hegel/.cores
+src/check/hegel/test_*
+!src/check/hegel/test_*.c
 src/esmumps/*[.][ao]
 src/esmumps/*[.]so
 src/esmumps/common.h
@@ -58,5 +64,5 @@ build*/
 # c4ffein
 
 .claude
-Cargo.toml
+Cargo.lock
 hegel/src/target/

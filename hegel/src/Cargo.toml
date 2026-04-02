@@ -1,0 +1,13 @@
+[package]
+name = "hegel-c"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+hegeltest = "0.1"
+
+[profile.release]
+panic = "unwind"
