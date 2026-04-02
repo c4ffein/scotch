@@ -54,3 +54,9 @@ src/scotch/*
 !src/check/CMakeLists.txt
 !src/scotch/Makefile
 build*/
+
+# c4ffein
+
+.claude
+Cargo.toml
+hegel/src/target/
