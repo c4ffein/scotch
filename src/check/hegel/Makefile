@@ -43,14 +43,13 @@ TESTS = test_graph_part test_graph_color test_graph_order \
         test_strat_each_bipart test_strat_each_order \
         test_stress_10k \
         test_graph_order_save_load test_graph_tab_save_load \
-        test_metis_part_recursive
+        test_metis_part_recursive \
+        test_strat_use
 
 # test_metis_part exposes a known bug (CLAUDE.md: MeTiS base-1 partition bug)
-# test_metis_part: known MeTiS base-1 partition bug
-# test_strat_use: SCOTCH_STRATDISCONNECTED produces garbage permutation on small graphs
-TESTS_XFAIL = test_metis_part test_strat_use
+TESTS_XFAIL = test_metis_part
 
-.PHONY: all clean clean-cores test test-loop hegel-c-lib
+.PHONY: all clean clean-cores test test-loop hegel-c-lib bench bench_fork bench_nofork bench_nofork_bins
 
 all: hegel-c-lib $(TESTS) $(TESTS_XFAIL)
 
@@ -108,12 +107,47 @@ test-loop: all
 		run=$$((run + 1)); \
 	done
 
+BENCH_TESTS = test_graph_part test_stress_10k
+
+bench: all bench_fork bench_nofork
+
+bench_fork: all
+	@echo "=== fork mode (default, crash-safe) ==="
+	@for t in $(BENCH_TESTS); do \
+		printf "  %-25s" "$$t:"; \
+		start=$$(date +%s%N); \
+		for i in $$(seq 1 5); do \
+			./$$t > /dev/null 2>&1; \
+		done; \
+		end=$$(date +%s%N); \
+		elapsed=$$(( (end - start) / 1000000 )); \
+		printf "%5dms total  %5dms avg (5 runs)\n" $$elapsed $$(( elapsed / 5 )); \
+	done
+
+bench_nofork: all bench_nofork_bins
+	@echo "=== nofork mode (no crash isolation) ==="
+	@for t in $(BENCH_TESTS); do \
+		printf "  %-25s" "$$t:"; \
+		start=$$(date +%s%N); \
+		for i in $$(seq 1 5); do \
+			./bench_$$t > /dev/null 2>&1; \
+		done; \
+		end=$$(date +%s%N); \
+		elapsed=$$(( (end - start) / 1000000 )); \
+		printf "%5dms total  %5dms avg (5 runs)\n" $$elapsed $$(( elapsed / 5 )); \
+	done
+
+bench_nofork_bins:
+	@for t in $(BENCH_TESTS); do \
+		$(CC) $(CFLAGS) -DHEGEL_BENCH_NOFORK -o bench_$$t $$t.c $(LDFLAGS); \
+	done
+
 clean-cores:
 	rm -rf .cores/
 	rm -f core.*
 
 clean:
-	rm -f $(TESTS) $(TESTS_XFAIL)
+	rm -f $(TESTS) $(TESTS_XFAIL) bench_*
 	rm -rf .cores/
 	rm -f core.*
 	cd $(HEGEL_DIR)/src && cargo clean

@@ -7,6 +7,40 @@
 #include "hegel_c.h"
 
 /*
+** When compiled with -DHEGEL_BENCH_NOFORK, redirect hegel_run_test
+** to the nofork variant for benchmarking fork overhead.
+*/
+#ifdef HEGEL_BENCH_NOFORK
+#define hegel_run_test   hegel_run_test_nofork
+#define hegel_run_test_n hegel_run_test_nofork_n
+#endif
+
+/*
+** Reset Scotch's global random state for deterministic behavior.
+*/
+static
+void
+scotchResetForHegel_ (void)
+{
+  SCOTCH_randomSeed (42);
+  SCOTCH_randomReset ();
+}
+
+/*
+** Register Scotch's RNG reset as a per-test-case setup callback.
+** Uses __attribute__((constructor)) so it runs automatically before main().
+** This keeps hegel-c itself free of Scotch dependencies.
+*/
+__attribute__((constructor))
+static
+void
+scotchSetupHegel_ (void)
+{
+  hegel_set_case_setup (scotchResetForHegel_);
+}
+
+
+/*
 ** Graph generation utilities for Hegel PBT tests.
 ** Each generator builds a valid graph in CSR format (verttab/edgetab)
 ** with the specified baseval.

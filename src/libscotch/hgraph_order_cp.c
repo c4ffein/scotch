@@ -475,7 +475,7 @@ loop_failed: ;
   coarvpostax = coargrafdat.s.verttax;            /* Re-cycle verttab (not velotab as may be merged with coarvsiztab) */
   coarperitax = coarperitab - coargrafdat.s.baseval;
 
-  for (coarvertnum = coargrafdat.s.baseval, finevsizsum = ordenum; /* Compute initial indices for inverse permutation expansion */
+  for (coarvertnum = coargrafdat.s.baseval, finevsizsum = 0; /* Compute initial indices for inverse permutation expansion */
        coarvertnum < coargrafdat.vnohnnd; coarvertnum ++) {
     coarvpostax[coarperitax[coarvertnum]] = finevsizsum;
     finevsizsum += coarvsiztax[coarperitax[coarvertnum]];
