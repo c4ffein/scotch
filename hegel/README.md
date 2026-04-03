@@ -12,7 +12,9 @@ Currently a duct-taped C library — your tests include a .h, link a .a, never s
 ## TODO
 - [ ] Suppress "Draw N:" trace output from Hegel during shrinking (noisy)
 - [ ] Create specific repo (could get Scotch through scripts for real-world tests?)
-- [ ] Full test suite, verify our sloppy duct-taped layer can handle tests
+- [ ] selftest suite
+  - [ ] Rewrite all 16 selftest files to follow the three-layer pattern described in `Selftest pattern`
+    - Claude pretended to understand what I asked for, parroted me to prove their understanding, and implemented these. Never trust Claude.
   - [ ] Grammar-based strategy fuzzer
     — recursive generator for structured strings with
       - method letters,
@@ -39,6 +41,42 @@ Currently a duct-taped C library — your tests include a .h, link a .a, never s
 ## Design decisions
 - **Pure C, no C++.** A separate C++ Hegel binding is WIP by the Hegel team. This lib stays pure C.
 - **`graph_gen.h` / `scotch_helpers.h` stay in the Scotch test harness**, not in hegel-c. They're Scotch-specific. But they contain patterns (CSR builders, strategy generators) worth generalizing later.
+
+## Selftest pattern
+
+**NOTE: The current selftest files (as of 2026-04-03) do NOT follow this pattern properly.** They skip layer 1 — the "function under test" is inlined into the hegel assertion, testing nothing real. Claude did this and tried to gaslight me lol.
+
+The selftest suite (`selftest/`) tests hegel-c itself. Each test has **three layers**:
+
+1. **A C function under test** — a standalone function with a *known* bug, crash, or edge case on specific inputs. This is the "code someone wrote." It exists independently of hegel.
+2. **A hegel test** — a property test that exercises that function using `hegel_draw_*` and `HEGEL_ASSERT`. Hegel should find the bug and shrink to a minimal counterexample.
+3. **The outer runner** — the Makefile target that runs the binary and checks the *exit code* (and optionally stderr). This is the real test: it verifies that hegel-c did its job.
+
+Example structure:
+```c
+/* Layer 1: function under test — has a bug when x overflows */
+int square(int x) {
+    return (int)((unsigned)x * (unsigned)x);  /* wraps */
+}
+
+/* Layer 2: hegel test that exercises it */
+void testSquare(hegel_testcase *tc) {
+    int x = hegel_draw_int(tc, 40000, 100000);
+    int result = square(x);
+    HEGEL_ASSERT(result >= 0, "square(%d) = %d", x, result);
+}
+
+/* main just hands it to hegel */
+int main() { hegel_run_test(testSquare); return 0; }
+```
+
+Layer 3 (the Makefile) knows this test should exit non-zero — hegel should catch the overflow.
+
+Four categories:
+- **PASS tests**: function is correct, hegel should find no bug, exit 0
+- **FAIL tests**: function has a known bug, hegel should find it, exit non-zero
+- **CRASH tests**: function segfaults/aborts on specific inputs, fork isolation should catch it, exit non-zero
+- **CRASH+PASS tests**: function crashes on some inputs but the hegel test uses `hegel_assume` or generators to avoid those inputs — fork isolation catches any stray crashes, but the test should still pass (exit 0). Proves crash isolation doesn't interfere with normal test flow.
 
 ## Benchmarking
 
