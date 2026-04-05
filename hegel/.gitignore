@@ -1,0 +1,4 @@
+src/target/
+selftest/core.*
+selftest/test_*
+!selftest/test_*.c
